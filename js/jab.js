@@ -305,12 +305,24 @@
     }
 
     var splits = [];
+    var dead = false;
 
-    targets.forEach(function (el) {
-      var split = new window.SplitType(el, { types: "lines", lineClass: "line" });
+    function runSplit() {
+      if (dead) return;
+      targets.forEach(buildOne);
+      window.ScrollTrigger.refresh();
+    }
+
+    /* Splitting before the webfont lands bakes in the fallback's line breaks,
+       which then stay wrong after the swap. Wait for the real metrics. */
+    if (document.fonts && document.fonts.ready) document.fonts.ready.then(runSplit, runSplit);
+    else window.setTimeout(runSplit, 500);
+
+    function buildOne(el) {
+      var inst = new window.SplitType(el, { types: "lines", lineClass: "line" });
 
       /* SplitType gives us the lines; the mask needs an inner element to move. */
-      var inners = split.lines.map(function (line) {
+      var inners = inst.lines.map(function (line) {
         var span = document.createElement("span");
         span.className = "line__in";
         while (line.firstChild) span.appendChild(line.firstChild);
@@ -328,13 +340,16 @@
         scrollTrigger: { trigger: el, start: "top 88%", once: true }
       });
 
-      splits.push(split);
-    });
+      splits.push(inst);
+    }
 
     /* Returned to the matchMedia context: on a breakpoint change the lines
-       are un-split before they are measured and split again. */
+       are un-split before they are measured and split again. `dead` stops a
+       late fonts.ready from splitting text this context no longer owns. */
     return function () {
+      dead = true;
       splits.forEach(function (s) { s.revert(); });
+      splits.length = 0;
       targets.forEach(function (el) { el.style.opacity = 1; });
     };
   }
@@ -424,7 +439,7 @@
     var set = track.querySelector(".ticker__set");
     if (!set) return;
 
-    /* One clone is enough for a seamless loop of a single repeating set. */
+    /* One clone is enough to loop a single repeating set without a visible join. */
     if (track.children.length < 2) track.appendChild(set.cloneNode(true));
 
     var vertical = desktop();
