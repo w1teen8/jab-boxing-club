@@ -1,0 +1,881 @@
+/* =========================================================================
+   JAB - concept landing page
+   -------------------------------------------------------------------------
+   Palette is five values and no more. Red marks effort, blue marks rest.
+   Neither colour is ever decorative.
+
+     canvas    #e3dcce   bleached ring canvas, the ground for every plate
+     graphite  #1c1d1f   text, and the near-dark frame of the hero
+     chalk     #f5f1e8   type on graphite
+     red       #ce2b22   work
+     blue      #2447c8   rest
+
+   Contrast, measured against the plate the type actually sits on:
+     graphite on canvas   13.0:1
+     chalk on graphite    14.3:1
+     chalk on red          4.7:1   (solid button, passes AA for body)
+     blue on canvas        5.5:1
+     red on canvas         3.9:1   so red is used for display sizes and
+                                   marks only, never for small copy.
+
+   The page is a column of solid plates floating on one fixed film layer,
+   so no string of text ever has to fight a moving frame for contrast.
+   ========================================================================= */
+
+:root {
+  --canvas: #e3dcce;
+  --graphite: #1c1d1f;
+  --chalk: #f5f1e8;
+  --red: #ce2b22;
+  --blue: #2447c8;
+
+  /* The round phase drives this one hook, and nothing else. */
+  --phase: var(--red);
+
+  --display: "Archivo Narrow", "Arial Narrow", "Helvetica Neue", system-ui, sans-serif;
+  --body: "Archivo", system-ui, -apple-system, "Segoe UI", sans-serif;
+
+  /* One radius value for the whole page: none. Scorecards are not rounded. */
+  --r: 0px;
+
+  --gut: clamp(1rem, 3.4vw, 4.5rem);
+  --nav-h: 68px;
+  --plate-max: 1360px;
+
+  --snap: 140ms;
+  --ease: cubic-bezier(0.2, 0.7, 0.3, 1);
+}
+
+*, *::before, *::after { box-sizing: border-box; }
+
+html {
+  -webkit-text-size-adjust: 100%;
+  scrollbar-gutter: stable;
+}
+
+body {
+  margin: 0;
+  background: var(--graphite);
+  color: var(--graphite);
+  font-family: var(--body);
+  font-size: clamp(1rem, 0.96rem + 0.2vw, 1.0625rem);
+  line-height: 1.55;
+  font-weight: 400;
+  overflow-x: hidden;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* Lenis adds this; without it the library's own wheel handling is inert. */
+html.lenis, html.lenis body { height: auto; }
+.lenis.lenis-smooth { scroll-behavior: auto !important; }
+
+h1, h2, h3, .round__n, .figure__n, .timer__clock, .price__num, .nav__mark, .foot__mark {
+  font-family: var(--display);
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  line-height: 1.02;
+  margin: 0;
+  text-wrap: balance;
+}
+
+p { margin: 0 0 1em; }
+p:last-child { margin-bottom: 0; }
+
+a { color: inherit; text-decoration-thickness: 1px; text-underline-offset: 0.22em; }
+
+img, video, svg { display: block; max-width: 100%; }
+
+/* Every number on this page is time or count, so every number is tabular. */
+.round__n, .figure__n, .timer__clock, .timer__index, .price__num,
+.srow__time, .ticker__set, .countin__digit, .dial__num, .dial__of {
+  font-variant-numeric: tabular-nums;
+  font-feature-settings: "tnum" 1;
+}
+
+:focus-visible {
+  outline: 3px solid var(--blue);
+  outline-offset: 3px;
+}
+/* The custom cursor never stands in for a focus ring. */
+.cursor { pointer-events: none; }
+
+.sr-only {
+  position: absolute; width: 1px; height: 1px;
+  margin: -1px; padding: 0; overflow: hidden;
+  clip-path: inset(50%); white-space: nowrap; border: 0;
+}
+
+.skip {
+  position: fixed; top: 0; left: 50%; z-index: 90;
+  transform: translate(-50%, -110%);
+  padding: 0.7rem 1.2rem;
+  background: var(--graphite); color: var(--chalk);
+  font-family: var(--display); font-size: 0.95rem;
+  text-decoration: none;
+}
+.skip:focus-visible { transform: translate(-50%, 0); }
+
+/* =========================================================================
+   The fixed film layer. Two slots, 400ms crossfade, one playing at a time.
+   ========================================================================= */
+
+.stage {
+  position: fixed; inset: 0; z-index: 0;
+  background: var(--graphite);
+  pointer-events: none;
+  contain: strict;
+}
+
+.stage__slot {
+  position: absolute; inset: 0;
+  opacity: 0;
+  transition: opacity 400ms linear;
+  will-change: opacity;
+}
+.stage__slot.is-active { opacity: 1; }
+
+.stage__still {
+  position: absolute; inset: 0;
+  background-position: center;
+  background-size: cover;
+  background-repeat: no-repeat;
+}
+
+.stage__video {
+  position: absolute; inset: 0;
+  width: 100%; height: 100%;
+  object-fit: cover;
+  opacity: 0;
+  transition: opacity 400ms linear;
+}
+.stage__video.is-playing { opacity: 1; }
+
+/* Colour temperature. A flat tint, never a gradient wash. */
+.stage__temp {
+  position: absolute; inset: 0;
+  background: var(--phase);
+  opacity: 0.1;
+  transition: background 700ms linear, opacity 700ms linear;
+  mix-blend-mode: multiply;
+}
+
+/* =========================================================================
+   Count-in, wipe, dial, ticker, cursor
+   ========================================================================= */
+
+/* Driven entirely by CSS: 3, 2, 1 at 400ms each, then it clears itself.
+   If the main script never loads, the page is still released on time. */
+.countin { display: none; }
+.countin[hidden] { display: none !important; }
+
+html[data-countin="on"] .countin {
+  position: fixed; inset: 0; z-index: 80;
+  display: grid; place-items: center;
+  background: var(--graphite);
+  animation: ci-out 1.2s linear forwards;
+}
+@keyframes ci-out {
+  0%, 92% { opacity: 1; visibility: visible; }
+  100% { opacity: 0; visibility: hidden; }
+}
+
+.countin__digits { position: relative; display: grid; place-items: center; }
+.countin__digit {
+  grid-area: 1 / 1;
+  font-family: var(--display);
+  font-weight: 700;
+  font-size: clamp(7rem, 34vmin, 22rem);
+  line-height: 1;
+  color: var(--chalk);
+  letter-spacing: -0.04em;
+  opacity: 0;
+  animation: ci-digit 0.4s linear forwards;
+}
+.countin__digit:nth-child(1) { animation-delay: 0s; }
+.countin__digit:nth-child(2) { animation-delay: 0.4s; }
+/* The bell lands on the last count, in red. No audio without a gesture. */
+.countin__digit:nth-child(3) { animation-delay: 0.8s; color: var(--red); }
+@keyframes ci-digit {
+  0% { opacity: 1; transform: scale(1.06); }
+  72% { opacity: 1; transform: scale(1); }
+  100% { opacity: 0; transform: scale(1); }
+}
+
+.countin__skip {
+  position: absolute; bottom: 8vh; left: 50%;
+  transform: translateX(-50%);
+  background: none; border: 1px solid rgb(245 241 232 / 0.35);
+  color: var(--chalk);
+  font-family: var(--display); font-size: 0.9rem;
+  padding: 0.55rem 1.1rem; cursor: pointer;
+  border-radius: var(--r);
+}
+
+/* The jab: out and back, 70ms each way, no easing drama. */
+.wipe {
+  position: fixed; inset: 0; z-index: 70;
+  background: var(--red);
+  transform: scaleX(0);
+  transform-origin: left center;
+  pointer-events: none;
+  will-change: transform;
+}
+
+/* Sits on its own plate rather than a blend mode: contrast is then a fact,
+   not a function of whichever frame of film happens to be behind it. */
+.dial {
+  position: fixed; z-index: 60;
+  left: var(--gut); bottom: clamp(1rem, 3vw, 2.2rem);
+  width: 78px; height: 78px;
+  display: grid; place-items: center;
+  pointer-events: none;
+  background: var(--canvas);
+  color: var(--graphite);
+}
+.dial__svg { position: absolute; inset: 3px; width: auto; height: auto; transform: rotate(-90deg); }
+.dial__track, .dial__arc { fill: none; stroke-width: 2.5; }
+.dial__track { stroke: currentColor; opacity: 0.24; }
+.dial__arc {
+  stroke: var(--phase);
+  stroke-linecap: butt;
+  stroke-dasharray: 131.95;
+  stroke-dashoffset: 131.95;
+  transition: stroke 300ms linear;
+}
+.dial__num {
+  font-family: var(--display); font-weight: 700;
+  font-size: 1.4rem; line-height: 1;
+  transform: translateY(-3px);
+}
+.dial__of {
+  position: absolute; bottom: 7px; left: 0; right: 0;
+  text-align: center;
+  font-family: var(--display); font-size: 0.66rem;
+  letter-spacing: 0.06em; opacity: 0.7;
+}
+
+.ticker {
+  position: fixed; z-index: 55;
+  right: 0; top: 0; bottom: 0; width: 32px;
+  overflow: hidden;
+  pointer-events: none;
+  background: var(--graphite);
+  color: var(--chalk);
+  border-left: 1px solid rgb(245 241 232 / 0.14);
+}
+/* Vertical writing mode rather than a rotate, so the loop can be animated
+   on y without fighting a transform that is already in use. */
+.ticker__track {
+  writing-mode: vertical-rl;
+  display: flex; flex-direction: row;
+  padding-top: 0.6rem;
+  font-family: var(--display); font-size: 0.76rem;
+  letter-spacing: 0.14em; white-space: nowrap;
+  will-change: transform;
+}
+.ticker__set { padding-bottom: 2.5rem; }
+
+.cursor {
+  position: fixed; top: 0; left: 0; z-index: 65;
+  display: none;
+}
+.cursor__ring, .cursor__trail {
+  position: absolute; top: 0; left: 0;
+  border-radius: 50%;
+  border: 1px solid var(--chalk);
+  mix-blend-mode: difference;
+  will-change: transform;
+}
+.cursor__ring { width: 30px; height: 30px; margin: -15px 0 0 -15px; }
+.cursor__trail { width: 30px; height: 30px; margin: -15px 0 0 -15px; opacity: 0.35; }
+
+@media (hover: hover) and (pointer: fine) {
+  html[data-cursor="on"] .cursor { display: block; }
+  html[data-cursor="on"], html[data-cursor="on"] a, html[data-cursor="on"] button { cursor: none; }
+}
+
+/* =========================================================================
+   Nav. One line, 68px, always on a solid plate so contrast never depends
+   on which frame of film happens to be behind it.
+   ========================================================================= */
+
+.nav {
+  position: fixed; top: 0; left: 0; right: 0; z-index: 50;
+  height: var(--nav-h);
+  display: flex; align-items: center; gap: clamp(1rem, 3vw, 2.5rem);
+  padding: 0 var(--gut);
+  background: var(--canvas);
+  border-bottom: 1px solid rgb(28 29 31 / 0.16);
+}
+.nav__mark {
+  font-size: 1.5rem; letter-spacing: 0.02em;
+  text-decoration: none; margin-right: auto;
+}
+.nav__links {
+  display: flex; gap: clamp(0.9rem, 1.8vw, 1.9rem);
+  font-size: 0.95rem;
+}
+.nav__links a { text-decoration: none; white-space: nowrap; }
+.nav__links a:hover { text-decoration: underline; }
+
+/* =========================================================================
+   Buttons. Sharp, label on one line, magnetic pull applied to the inner span.
+   ========================================================================= */
+
+.btn {
+  display: inline-flex; align-items: center; justify-content: center;
+  min-height: 52px; padding: 0 1.6rem;
+  border: 1px solid var(--graphite); border-radius: var(--r);
+  background: var(--graphite); color: var(--chalk);
+  font-family: var(--display); font-weight: 600;
+  font-size: 1.0625rem; letter-spacing: 0.01em;
+  text-decoration: none; white-space: nowrap; cursor: pointer;
+  transition: background var(--snap) linear, color var(--snap) linear, border-color var(--snap) linear;
+}
+.btn > span { display: block; will-change: transform; }
+.btn:hover { background: var(--red); border-color: var(--red); }
+.btn:active { background: var(--red); transform: translateY(1px); }
+
+.btn--line { background: transparent; color: var(--graphite); }
+.btn--line:hover { background: var(--graphite); color: var(--chalk); border-color: var(--graphite); }
+.btn--line[aria-pressed="true"] { background: var(--blue); border-color: var(--blue); color: var(--chalk); }
+
+.btn--ghost { background: transparent; color: var(--graphite); min-height: 44px; font-size: 1rem; }
+.btn--ghost:hover { background: var(--graphite); color: var(--chalk); }
+
+/* =========================================================================
+   Plates and the round label
+   ========================================================================= */
+
+main { position: relative; z-index: 10; }
+
+section { position: relative; scroll-margin-top: calc(var(--nav-h) + 8px); }
+
+.round {
+  display: flex; align-items: baseline; gap: 0.5rem;
+  margin: 0 0 1.4rem;
+  color: var(--phase);
+}
+.round__n { font-size: clamp(2.2rem, 5vw, 3.4rem); }
+.round__w {
+  font-family: var(--display); font-size: 0.85rem;
+  letter-spacing: 0.1em; color: var(--graphite); opacity: 0.6;
+}
+.round--light .round__w { color: var(--chalk); opacity: 0.7; }
+
+/* =========================================================================
+   ROUND 01 - Hero
+   ========================================================================= */
+
+.hero {
+  min-height: 100dvh;
+  display: grid;
+  padding: calc(var(--nav-h) + clamp(1rem, 2vw, 2rem)) var(--gut) clamp(2rem, 5vh, 4rem);
+}
+/* Near-dark frame: a flat veil, so the letterforms are the only window. */
+.hero::before {
+  content: ""; position: absolute; inset: 0;
+  background: var(--graphite); opacity: 0.86;
+}
+.hero__inner {
+  position: relative;
+  width: 100%; max-width: var(--plate-max);
+  margin-inline: auto;
+  display: grid;
+  grid-template-rows: auto minmax(0, 1fr) auto;
+  gap: clamp(1rem, 2.4vh, 2rem);
+}
+.hero .round { color: var(--red); }
+.hero .round__w { color: var(--chalk); opacity: 0.7; }
+
+.hero__word { display: grid; align-items: center; min-height: 0; }
+.wordmark { width: 100%; height: 100%; max-height: 46vh; }
+.wordmark__text {
+  font-family: var(--display);
+  font-weight: 700;
+  font-size: 300px;
+  letter-spacing: -0.03em;
+}
+.wordmark__fo { opacity: 0; transition: opacity 400ms linear; }
+.wordmark__fo.is-playing { opacity: 1; }
+.wordmark__fo video { width: 100%; height: 100%; object-fit: cover; }
+
+.hero__plate {
+  justify-self: start;
+  max-width: 54ch;
+  background: var(--canvas);
+  padding: clamp(1.2rem, 2.4vw, 2rem);
+  display: grid; gap: 1.4rem; justify-items: start;
+}
+.hero__h1 { font-size: clamp(1.45rem, 1.1rem + 1.7vw, 2.5rem); }
+
+/* =========================================================================
+   Concept disclosure
+   ========================================================================= */
+
+.disclosure {
+  max-width: var(--plate-max);
+  margin: clamp(1rem, 2vw, 1.6rem) auto;
+  padding: 1rem clamp(1rem, 2.4vw, 2rem);
+  background: var(--canvas);
+  border-left: 4px solid var(--blue);
+}
+.disclosure p { font-size: 0.95rem; max-width: 92ch; }
+
+/* =========================================================================
+   ROUND 02 - The spine. Film pinned, text scrolls over it.
+   ========================================================================= */
+
+.spine { padding: 0 var(--gut); }
+.spine__rail {
+  position: sticky; top: var(--nav-h);
+  height: 0; z-index: 2;
+  max-width: var(--plate-max); margin-inline: auto;
+}
+.spine__rail .round { padding-top: clamp(1rem, 3vh, 2.5rem); }
+
+.spine__panels {
+  max-width: var(--plate-max); margin-inline: auto;
+  display: grid; gap: 60vh;
+  padding: 36vh 0 40vh;
+}
+.spine__panel {
+  max-width: 46ch;
+  background: var(--graphite);
+  color: var(--chalk);
+  padding: clamp(1.4rem, 2.6vw, 2.4rem);
+}
+.spine__panel:nth-child(even) { justify-self: end; }
+.spine__panel h2, .spine__panel h3 { margin-bottom: 0.8rem; }
+.spine__h2 { font-size: clamp(2rem, 1.2rem + 3.4vw, 4.2rem); }
+.spine__panel h3 { font-size: clamp(1.4rem, 1.1rem + 1.1vw, 2rem); }
+.spine__panel p { color: rgb(245 241 232 / 0.84); }
+
+/* =========================================================================
+   ROUND 03 - Numbers
+   ========================================================================= */
+
+.figures {
+  max-width: var(--plate-max); margin-inline: auto;
+  background: var(--canvas);
+  padding: clamp(2.4rem, 6vw, 5rem) clamp(1.2rem, 3vw, 3.5rem);
+}
+.figures__h2 { font-size: clamp(1.8rem, 1.2rem + 2.4vw, 3.2rem); margin-bottom: clamp(2rem, 4vw, 3.4rem); }
+.figures__grid {
+  margin: 0;
+  display: grid; gap: clamp(1.6rem, 3vw, 2.6rem);
+  grid-template-columns: repeat(auto-fit, minmax(170px, 1fr));
+}
+.figure { border-top: 1px solid rgb(28 29 31 / 0.22); padding-top: 0.9rem; }
+.figure:nth-child(2) { margin-top: clamp(0rem, 2vw, 1.8rem); }
+.figure:nth-child(4) { margin-top: clamp(0rem, 3vw, 2.6rem); }
+.figure dt { font-size: 0.9rem; opacity: 0.72; margin-bottom: 0.3rem; }
+.figure__n {
+  margin: 0;
+  font-size: clamp(3rem, 2rem + 5vw, 6.5rem);
+  letter-spacing: -0.04em;
+}
+
+/* =========================================================================
+   ROUND 04 - The first-class timer
+   ========================================================================= */
+
+.timer {
+  max-width: var(--plate-max); margin: clamp(1rem, 2vw, 1.6rem) auto;
+  background: var(--canvas);
+  padding: clamp(2.4rem, 6vw, 5rem) clamp(1.2rem, 3vw, 3.5rem);
+}
+.timer__head { max-width: 62ch; margin-bottom: clamp(1.8rem, 4vw, 3rem); }
+.timer__head h2 { font-size: clamp(1.9rem, 1.2rem + 2.6vw, 3.4rem); margin-bottom: 1rem; }
+.timer__sub { opacity: 0.78; }
+
+.timer__body {
+  display: grid; gap: clamp(1.4rem, 3vw, 2.6rem);
+  grid-template-columns: minmax(0, 1.25fr) minmax(0, 1fr);
+  align-items: start;
+}
+.timer__stage { position: relative; background: var(--graphite); }
+.timer__media { position: relative; aspect-ratio: 16 / 9; overflow: hidden; }
+.timer__still {
+  position: absolute; inset: 0;
+  background-position: center; background-size: cover;
+  transition: opacity 400ms linear;
+}
+.timer__video {
+  position: absolute; inset: 0; width: 100%; height: 100%;
+  object-fit: cover; opacity: 0; transition: opacity 400ms linear;
+}
+.timer__video.is-playing { opacity: 1; }
+
+/* The clock sits on its own plate, not on the footage. */
+.timer__hud {
+  position: absolute; left: 0; bottom: 0;
+  display: flex; align-items: baseline; gap: 1rem;
+  padding: 0.7rem 1.1rem;
+  background: var(--canvas);
+}
+.timer__phase {
+  font-family: var(--display); font-weight: 700;
+  font-size: 0.8rem; letter-spacing: 0.12em;
+  color: var(--chalk); background: var(--phase);
+  padding: 0.22rem 0.5rem;
+}
+.timer__clock { font-size: clamp(2.6rem, 2rem + 3vw, 4.6rem); letter-spacing: -0.045em; }
+.timer__index { font-family: var(--display); font-size: 0.9rem; opacity: 0.7; }
+
+.timer__bar { height: 4px; background: rgb(28 29 31 / 0.25); overflow: hidden; }
+.timer__fill {
+  display: block; height: 100%; background: var(--phase);
+  transform: scaleX(0); transform-origin: left center;
+  will-change: transform;
+}
+
+.timer__panel { display: grid; gap: 1.1rem; }
+.timer__title { font-size: clamp(1.5rem, 1.1rem + 1.4vw, 2.2rem); }
+.timer__line { font-size: 1.0625rem; }
+.timer__controls { display: flex; flex-wrap: wrap; gap: 0.6rem; }
+.timer__note { font-size: 0.875rem; opacity: 0.66; }
+
+.plan {
+  margin-top: clamp(1.6rem, 3vw, 2.4rem);
+  border-top: 1px solid rgb(28 29 31 / 0.22);
+  padding-top: 1rem;
+}
+.plan summary {
+  font-family: var(--display); font-size: 1.05rem;
+  cursor: pointer; padding: 0.3rem 0;
+}
+.plan__list { margin: 1rem 0; padding-left: 1.4rem; display: grid; gap: 0.7rem; max-width: 76ch; }
+.timer__cta { margin-top: clamp(1.6rem, 3vw, 2.4rem); }
+
+/* =========================================================================
+   ROUND 05 - Coaches. Six strips, the hovered one opens and plays.
+   ========================================================================= */
+
+.coaches { padding: clamp(2.4rem, 6vw, 5rem) 0; }
+.coaches__head {
+  max-width: var(--plate-max); margin: 0 auto clamp(1.6rem, 3vw, 2.6rem);
+  padding: clamp(1.2rem, 2.4vw, 2rem);
+  background: var(--canvas);
+  width: fit-content;
+}
+.coaches__head h2 { font-size: clamp(1.9rem, 1.2rem + 2.6vw, 3.4rem); }
+
+.coaches__strip {
+  list-style: none; margin: 0; padding: 0 var(--gut);
+  max-width: var(--plate-max); margin-inline: auto;
+  display: flex; gap: 2px;
+}
+.coach {
+  position: relative; flex: 1 1 0; min-width: 0;
+  background: var(--graphite);
+  transition: flex-grow 420ms var(--ease);
+}
+.coach__media { position: relative; aspect-ratio: 9 / 16; overflow: hidden; }
+.coach__still {
+  position: absolute; inset: 0;
+  background-position: center; background-size: cover;
+  filter: saturate(0.7);
+  transition: filter 300ms linear;
+}
+.coach__video {
+  position: absolute; inset: 0; width: 100%; height: 100%;
+  object-fit: cover; opacity: 0; transition: opacity 300ms linear;
+}
+.coach__video.is-playing { opacity: 1; }
+
+.coach__plate {
+  position: absolute; left: 0; right: 0; bottom: 0;
+  background: var(--canvas);
+  padding: 0.8rem 0.9rem;
+}
+.coach__name {
+  font-size: clamp(0.95rem, 0.8vw + 0.6rem, 1.15rem);
+  transition: font-size 420ms var(--ease);
+}
+.coach__role {
+  margin: 0.35rem 0 0; font-size: 0.85rem; opacity: 0;
+  max-height: 0; overflow: hidden;
+  transition: opacity 300ms linear, max-height 420ms var(--ease);
+}
+
+@media (hover: hover) and (pointer: fine) and (min-width: 768px) {
+  .coach:hover, .coach:focus-within { flex-grow: 2.6; }
+  .coach:hover .coach__still, .coach:focus-within .coach__still { filter: saturate(1); }
+  .coach:hover .coach__name, .coach:focus-within .coach__name { font-size: clamp(1.3rem, 1.6vw + 0.7rem, 2.3rem); }
+  .coach:hover .coach__role, .coach:focus-within .coach__role { opacity: 0.8; max-height: 4rem; }
+}
+
+/* =========================================================================
+   ROUND 06 - The room. Horizontal reel driven by vertical scroll.
+   ========================================================================= */
+
+.reel { background: var(--graphite); }
+.reel__pin { overflow: hidden; padding: clamp(2rem, 5vw, 4rem) 0; }
+.reel__head {
+  max-width: var(--plate-max); margin: 0 auto clamp(1.4rem, 3vw, 2.4rem);
+  padding: 0 var(--gut); color: var(--chalk);
+}
+.reel__head h2 { font-size: clamp(1.9rem, 1.2rem + 2.6vw, 3.4rem); }
+.reel__track {
+  display: flex; gap: clamp(1rem, 2vw, 2rem);
+  padding: 0 var(--gut);
+  will-change: transform;
+}
+.frame { margin: 0; flex: 0 0 auto; width: min(76vw, 680px); }
+.frame img { width: 100%; height: auto; background: #111; }
+.frame figcaption {
+  margin-top: 0.7rem; color: rgb(245 241 232 / 0.72);
+  font-size: 0.9rem;
+}
+
+/* =========================================================================
+   ROUND 07 - Schedule
+   ========================================================================= */
+
+.sched {
+  max-width: var(--plate-max); margin: clamp(1rem, 2vw, 1.6rem) auto;
+  background: var(--canvas);
+  padding: clamp(2.4rem, 6vw, 5rem) clamp(1.2rem, 3vw, 3.5rem);
+}
+.sched__head h2 { font-size: clamp(1.9rem, 1.2rem + 2.6vw, 3.4rem); margin-bottom: clamp(1.4rem, 3vw, 2.2rem); }
+
+.sched__controls { display: grid; gap: 0.8rem; margin-bottom: clamp(1.4rem, 3vw, 2rem); }
+.switch { display: flex; flex-wrap: wrap; gap: 2px; }
+.switch button {
+  font-family: var(--display); font-size: 0.95rem;
+  padding: 0.6rem 0.95rem;
+  border: 1px solid rgb(28 29 31 / 0.3);
+  background: transparent; color: var(--graphite);
+  border-radius: var(--r); cursor: pointer;
+  transition: background var(--snap) linear, color var(--snap) linear;
+}
+.switch button:hover { background: rgb(28 29 31 / 0.08); }
+.switch button[aria-pressed="true"] { background: var(--graphite); color: var(--chalk); border-color: var(--graphite); }
+.switch--level button[aria-pressed="true"] { background: var(--blue); border-color: var(--blue); color: var(--chalk); }
+
+.sched__rows { display: grid; }
+.srow {
+  display: grid; align-items: baseline;
+  grid-template-columns: 7ch minmax(0, 1fr) minmax(0, 14rem);
+  gap: 1rem;
+  padding: 1rem 0;
+  border-bottom: 1px solid rgb(28 29 31 / 0.18);
+}
+.srow__time { font-family: var(--display); font-weight: 700; font-size: 1.5rem; }
+.srow__class { font-size: 1.0625rem; }
+.srow__coach { font-size: 0.95rem; opacity: 0.7; }
+.srow--empty { opacity: 0.7; grid-template-columns: 1fr; }
+.sched__note { margin-top: 1.2rem; font-size: 0.95rem; opacity: 0.72; max-width: 62ch; }
+
+/* =========================================================================
+   ROUND 08 - Prices
+   ========================================================================= */
+
+.prices {
+  max-width: var(--plate-max); margin: clamp(1rem, 2vw, 1.6rem) auto;
+  padding: clamp(2.4rem, 6vw, 5rem) clamp(1.2rem, 3vw, 3.5rem);
+  background: var(--canvas);
+}
+.prices__head h2 { font-size: clamp(1.9rem, 1.2rem + 2.6vw, 3.4rem); margin-bottom: clamp(1.6rem, 3vw, 2.6rem); }
+.prices__grid {
+  display: grid; gap: clamp(1rem, 2vw, 1.6rem);
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1.28fr) minmax(0, 1fr);
+  align-items: start;
+}
+.price {
+  display: grid; gap: 0.9rem; justify-items: start;
+  padding: clamp(1.2rem, 2.2vw, 1.9rem);
+  border: 1px solid rgb(28 29 31 / 0.24);
+}
+.price--wide { background: var(--graphite); color: var(--chalk); border-color: var(--graphite); }
+.price--wide .price__body { color: rgb(245 241 232 / 0.84); }
+.price--wide .btn { background: var(--chalk); color: var(--graphite); border-color: var(--chalk); }
+.price--wide .btn:hover { background: var(--red); color: var(--chalk); border-color: var(--red); }
+.price__name { font-size: clamp(1.2rem, 1rem + 0.7vw, 1.6rem); }
+.price__amount { display: flex; align-items: baseline; gap: 0.5rem; margin: 0; }
+.price__num { font-size: clamp(2.8rem, 2rem + 3.4vw, 5rem); letter-spacing: -0.045em; }
+.price__unit { font-family: var(--display); font-size: 1rem; opacity: 0.7; }
+.price__body { font-size: 1rem; }
+.price__meta { font-family: var(--display); font-size: 0.9rem; color: var(--chalk); background: var(--blue); padding: 0.2rem 0.5rem; margin: 0; }
+
+/* =========================================================================
+   Booking band
+   ========================================================================= */
+
+.book {
+  max-width: var(--plate-max); margin: clamp(1rem, 2vw, 1.6rem) auto;
+  background: var(--canvas);
+  padding: clamp(2.4rem, 6vw, 5rem) clamp(1.2rem, 3vw, 3.5rem);
+  display: grid; gap: clamp(1.8rem, 4vw, 3.5rem);
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  align-items: start;
+}
+.book h2 { font-size: clamp(1.9rem, 1.2rem + 2.6vw, 3.4rem); margin-bottom: 1.1rem; }
+.book__copy p { max-width: 46ch; }
+.book__demo { font-size: 0.9rem; border-left: 4px solid var(--blue); padding-left: 0.8rem; opacity: 0.8; }
+
+.form { display: grid; gap: 1.1rem; }
+.field { display: grid; gap: 0.4rem; }
+.field label { font-family: var(--display); font-size: 0.95rem; letter-spacing: 0.02em; }
+.field input, .field select {
+  font-family: var(--body); font-size: 1rem;
+  padding: 0.75rem 0.85rem;
+  border: 1px solid rgb(28 29 31 / 0.4);
+  border-radius: var(--r);
+  background: var(--chalk); color: var(--graphite);
+  min-height: 48px; width: 100%;
+}
+.field input:hover, .field select:hover { border-color: var(--graphite); }
+.field__hint { margin: 0; font-size: 0.85rem; opacity: 0.68; }
+.field__err { margin: 0; font-size: 0.875rem; color: #a3190f; font-weight: 500; }
+.field__err[hidden] { display: none; }
+.field.is-bad input { border-color: #a3190f; border-width: 2px; }
+
+.check { display: flex; align-items: center; gap: 0.6rem; font-size: 0.95rem; cursor: pointer; }
+.check input { width: 22px; height: 22px; accent-color: var(--blue); }
+.form__submit { justify-self: start; }
+.form__status { margin: 0; font-family: var(--display); font-size: 1rem; min-height: 1.4em; }
+.form__status[data-ok="true"] { color: var(--blue); font-weight: 600; }
+
+/* =========================================================================
+   Footer
+   ========================================================================= */
+
+.foot {
+  position: relative; z-index: 10;
+  max-width: var(--plate-max); margin: clamp(1rem, 2vw, 1.6rem) auto 0;
+  background: var(--graphite); color: var(--chalk);
+  padding: clamp(2.4rem, 5vw, 4rem) clamp(1.2rem, 3vw, 3.5rem) clamp(5rem, 8vw, 6rem);
+}
+.foot__grid {
+  display: grid; gap: clamp(1.6rem, 3vw, 3rem);
+  grid-template-columns: repeat(auto-fit, minmax(190px, 1fr));
+  margin-bottom: clamp(2rem, 4vw, 3rem);
+}
+.foot__mark { font-size: 2.6rem; margin-bottom: 0.8rem; }
+.foot__col p { color: rgb(245 241 232 / 0.82); margin-bottom: 0.5rem; }
+.foot__col a { color: var(--chalk); }
+.foot__note {
+  border-top: 1px solid rgb(245 241 232 / 0.22);
+  padding-top: 1.2rem;
+  font-size: 0.9rem; color: rgb(245 241 232 / 0.8);
+  max-width: 96ch;
+}
+
+/* =========================================================================
+   Reveal targets. Pre-hidden only while scripting is live, so a failed
+   script or a reduced-motion preference always leaves readable text.
+   ========================================================================= */
+
+html[data-js="on"] [data-lines] { opacity: 0; }
+html[data-js="on"] [data-price] { opacity: 0; }
+html[data-js="on"] [data-spine-panel] { opacity: 0; }
+
+.line { overflow: hidden; }
+.line__in { display: block; will-change: transform; }
+
+/* =========================================================================
+   Responsive. Below 768px: no background video, no custom cursor, no
+   magnetic pull, no horizontal reel. The timer and the wipes stay.
+   ========================================================================= */
+
+/* The ticker owns a 32px column on the right, so nothing sits under it. */
+@media (min-width: 768px) {
+  body { padding-right: 32px; }
+  .nav { right: 32px; }
+}
+
+@media (max-width: 1080px) {
+  .timer__body { grid-template-columns: minmax(0, 1fr); }
+  .book { grid-template-columns: minmax(0, 1fr); }
+  .prices__grid { grid-template-columns: minmax(0, 1fr); }
+  .spine__panel:nth-child(even) { justify-self: start; }
+}
+
+@media (max-width: 767px) {
+  :root { --nav-h: 60px; }
+
+  .nav__links { display: none; }
+
+  .dial {
+    left: auto; right: var(--gut);
+    top: calc(var(--nav-h) + 0.6rem); bottom: auto;
+    width: 56px; height: 56px;
+  }
+  .dial__num { font-size: 1.05rem; }
+  .dial__of { bottom: -1rem; font-size: 0.62rem; }
+
+  .ticker {
+    top: auto; bottom: 0; left: 0; right: 0;
+    width: auto; height: 26px;
+    border-left: 0; border-top: 1px solid rgb(245 241 232 / 0.14);
+  }
+  .ticker__track {
+    writing-mode: horizontal-tb;
+    padding: 0.3rem 0 0;
+  }
+  .ticker__set { padding-bottom: 0; padding-right: 2.5rem; }
+
+  .wordmark { max-height: 30vh; }
+  .hero__plate { max-width: none; }
+
+  .spine__panels { gap: 34vh; padding: 20vh 0 24vh; }
+
+  .srow { grid-template-columns: 6ch minmax(0, 1fr); }
+  .srow__coach { grid-column: 2; opacity: 0.75; }
+
+  /* The reel becomes a vertical stack: no scroll hijack on touch. */
+  .reel__pin { overflow: visible; }
+  .reel__track { flex-direction: column; transform: none !important; padding-bottom: 1rem; }
+  .frame { width: 100%; }
+
+  .coaches__strip { flex-direction: column; padding-inline: var(--gut); }
+  .coach { flex: 1 1 auto; }
+  .coach__media { aspect-ratio: 16 / 10; }
+  .coach__role { opacity: 0.8; max-height: none; }
+
+  .foot { padding-bottom: 4rem; }
+}
+
+/* =========================================================================
+   Reduced motion. The count-in, wipes, cursor, smooth scroll and every
+   loop stop. Plates stay, the page reads top to bottom, and the timer
+   jumps between states without animating.
+   ========================================================================= */
+
+@media (prefers-reduced-motion: reduce) {
+  html[data-js="on"] [data-lines],
+  html[data-js="on"] [data-price],
+  html[data-js="on"] [data-spine-panel] { opacity: 1 !important; }
+
+  .countin, .wipe, .cursor { display: none !important; }
+
+  .stage__slot, .stage__video, .stage__temp, .timer__still, .timer__video,
+  .coach__still, .coach__video, .coach__name, .coach__role, .coach,
+  .timer__fill, .dial__arc, .btn, .switch button, .wordmark__fo {
+    transition: none !important;
+  }
+
+  /* No loop runs, so the ticker column is given back to the page. */
+  .ticker { display: none; }
+  body { padding-right: 0; }
+  .nav { right: 0; }
+
+  .reel__pin { overflow: visible; }
+  .reel__track { flex-direction: column; transform: none !important; }
+  .frame { width: 100%; }
+
+  .spine__panels { gap: clamp(2rem, 6vw, 4rem); padding: clamp(2rem, 6vw, 4rem) 0; }
+
+  /* Schedule rows change state without animating between them. */
+  ::view-transition-group(*),
+  ::view-transition-old(*),
+  ::view-transition-new(*) { animation: none !important; }
+}
+
+@media (prefers-contrast: more) {
+  .figure, .price, .srow { border-color: var(--graphite); }
+  .stage__temp { opacity: 0.04; }
+  .hero::before { opacity: 0.94; }
+}

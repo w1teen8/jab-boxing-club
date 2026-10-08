@@ -1,0 +1,450 @@
+<!doctype html>
+<html lang="en" data-theme="canvas">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>JAB - boxing in Kyiv for people who have never trained</title>
+<meta name="description" content="JAB is a concept for a boxing club in Kyiv built around the first punch a beginner learns. Trial class, beginner schedule, and a round timer that plays a real first class minute by minute.">
+<meta name="color-scheme" content="light">
+<meta name="robots" content="index,follow">
+<meta property="og:title" content="JAB - boxing in Kyiv for people who have never trained">
+<meta property="og:description" content="A concept landing page for a fictional beginner-first boxing club. The page runs round by round, like a fight.">
+<meta property="og:type" content="website">
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo+Narrow:wght@400;500;600;700&family=Archivo:wght@400;500&display=swap">
+<link rel="stylesheet" href="css/styles.css">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' fill='%231c1d1f'/%3E%3Crect x='6' y='14' width='20' height='4' fill='%23ce2b22'/%3E%3C/svg%3E">
+
+<script>
+  /* Marks that scripting is live so CSS can safely pre-hide reveal targets.
+     js/jab.js flips this to "off" if anything throws, which reveals everything. */
+  document.documentElement.dataset.js = 'on';
+
+  /* Decided before first paint so a returning visitor never sees the count-in
+     flash. The count-in itself is a CSS animation, so it clears on its own
+     even if the main script never arrives. */
+  try {
+    if (!window.sessionStorage.getItem('jab.countin') &&
+        !window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+      document.documentElement.dataset.countin = 'on';
+    }
+  } catch (e) { /* private mode: skip the intro rather than risk it sticking */ }
+</script>
+</head>
+
+<body>
+<a class="skip" href="#main">Skip to content</a>
+
+<!-- ============================================================
+     Fixed video stage. Two slots crossfade at 400ms on section change.
+     Each slot carries a still plate plus a video that is only attached
+     and played while its slot is active. Below 768px and under
+     reduced-motion the videos are never attached: the plate is the shot.
+     ============================================================ -->
+<div class="stage" aria-hidden="true" data-stage>
+  <div class="stage__slot is-active" data-slot>
+    <div class="stage__still" data-still-layer></div>
+    <video class="stage__video" muted loop playsinline preload="none" tabindex="-1"></video>
+  </div>
+  <div class="stage__slot" data-slot>
+    <div class="stage__still" data-still-layer></div>
+    <video class="stage__video" muted loop playsinline preload="none" tabindex="-1"></video>
+  </div>
+  <div class="stage__temp" data-temp></div>
+</div>
+
+<!-- Count-in: 3, 2, 1, bell. Once per session, 1.2s, any click or key skips it. -->
+<div class="countin" data-countin>
+  <span class="countin__digits" aria-hidden="true">
+    <span class="countin__digit">3</span>
+    <span class="countin__digit">2</span>
+    <span class="countin__digit">1</span>
+  </span>
+  <button class="countin__skip" type="button" data-countin-skip>Skip intro</button>
+</div>
+
+<!-- The jab wipe: 140ms horizontal snap at every section boundary. -->
+<div class="wipe" aria-hidden="true" data-wipe></div>
+
+<!-- Round indicator doubles as scroll progress. Red while in a round, blue between them. -->
+<div class="dial" aria-hidden="true" data-dial>
+  <svg class="dial__svg" viewBox="0 0 48 48">
+    <circle class="dial__track" cx="24" cy="24" r="21"></circle>
+    <circle class="dial__arc" cx="24" cy="24" r="21" data-dial-arc></circle>
+  </svg>
+  <span class="dial__num" data-dial-num>01</span>
+  <span class="dial__of">of 08</span>
+</div>
+
+<!-- Kinetic ticker of class times. Right edge on desktop, bottom edge on mobile. -->
+<div class="ticker" aria-hidden="true" data-ticker>
+  <div class="ticker__track" data-ticker-track>
+    <span class="ticker__set">
+      07:00 First time / 08:15 Beginner / 12:30 First time / 18:00 Beginner / 19:15 First time / 20:30 Open mat /
+    </span>
+  </div>
+</div>
+
+<!-- Focus ring cursor. Desktop pointers only. -->
+<div class="cursor" aria-hidden="true" data-cursor>
+  <span class="cursor__ring" data-cursor-ring></span>
+  <span class="cursor__trail" data-cursor-trail></span>
+</div>
+
+<header class="nav" data-nav>
+  <a class="nav__mark" href="#top" data-magnetic><span>JAB</span></a>
+  <nav class="nav__links" aria-label="Sections">
+    <a href="#why">The jab</a>
+    <a href="#first-class">First class</a>
+    <a href="#coaches">Coaches</a>
+    <a href="#schedule">Schedule</a>
+    <a href="#prices">Prices</a>
+  </nav>
+  <a class="btn btn--ghost nav__cta" href="#book" data-magnetic><span>Book a trial</span></a>
+</header>
+
+<main id="main">
+
+  <!-- ROUND 01 - HERO. Signature move: footage inside the letterforms. -->
+  <section class="hero" id="top" data-round="01" data-still="wraps" data-phase="work">
+    <div class="hero__inner">
+      <p class="round" aria-hidden="true"><span class="round__n">01</span><span class="round__w">Round</span></p>
+
+      <div class="hero__word" role="img" aria-label="JAB">
+        <svg class="wordmark" viewBox="0 0 1000 300" preserveAspectRatio="xMidYMid meet" data-wordmark aria-hidden="true">
+          <defs>
+            <mask id="jabMask" maskUnits="userSpaceOnUse" x="-200" y="-100" width="1400" height="500">
+              <rect x="-200" y="-100" width="1400" height="500" fill="#000"></rect>
+              <text class="wordmark__text" x="500" y="240" text-anchor="middle" fill="#fff">JAB</text>
+            </mask>
+          </defs>
+          <!-- The measuring copy. Definitions are never laid out, so getBBox on
+               the masked copy above is unreliable. fill="none" keeps this one
+               invisible while it still takes part in layout. -->
+          <text class="wordmark__text" data-wordmark-text x="500" y="240" text-anchor="middle" fill="none">JAB</text>
+          <g mask="url(#jabMask)">
+            <image data-wordmark-plate href="assets/stills/jab.svg" x="-200" y="-100" width="1400" height="500" preserveAspectRatio="xMidYMid slice"></image>
+            <foreignObject class="wordmark__fo" data-wordmark-fo x="-200" y="-100" width="1400" height="500"></foreignObject>
+          </g>
+        </svg>
+      </div>
+
+      <div class="hero__plate">
+        <h1 class="hero__h1" data-lines>You have never thrown a punch. That is exactly who this gym is for.</h1>
+        <a class="btn btn--solid hero__cta" href="#book" data-magnetic><span>Book a trial</span></a>
+      </div>
+    </div>
+  </section>
+
+  <!-- Required disclosure, kept out of the hero stack. -->
+  <aside class="disclosure" id="concept">
+    <p><strong>Concept project.</strong> JAB is not a real club. The gym, the coaches, the prices and the schedule are invented, the footage is illustrative, and both forms are in demo mode: nothing is sent anywhere.</p>
+  </aside>
+
+  <!-- ROUND 02 - THE SPINE. Signature move: the stage video stays pinned while the round text scrolls over it. -->
+  <section class="spine" id="why" data-round="02" data-still="jab" data-phase="work" data-spine>
+    <div class="spine__rail" aria-hidden="true">
+      <p class="round round--light"><span class="round__n">02</span><span class="round__w">Round</span></p>
+    </div>
+    <div class="spine__panels">
+      <div class="spine__panel" data-spine-panel>
+        <h2 class="spine__h2" data-lines>Why the jab comes first</h2>
+        <p>A jab is the first punch anyone is taught, and it is the most technical one in the sport. A straight line out, the same line back, nothing wasted. Learn it properly and the rest of boxing has somewhere to attach.</p>
+      </div>
+      <div class="spine__panel" data-spine-panel>
+        <h3>Three weeks on one punch</h3>
+        <p>Your first month is footwork, guard and the jab. Not because it is the easy part. Because every other punch is built on top of it, and skipping it is how people end up swinging.</p>
+      </div>
+      <div class="spine__panel" data-spine-panel>
+        <h3>Nobody spars in month one</h3>
+        <p>No contact, no rankings, no fitness test at the door. You will not be matched against anyone, and no coach will ask what you used to do at school.</p>
+      </div>
+      <div class="spine__panel" data-spine-panel>
+        <h3>Everyone is new in the beginner hour</h3>
+        <p>The first-time group is all first-timers. The whole room is learning the same punch at the same speed, which is the only reason it stops being uncomfortable.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ROUND 03 - NUMBERS. Signature move: tabular figures counting up on reveal. -->
+  <section class="figures" id="numbers" data-round="03" data-still="night" data-phase="work">
+    <p class="round" aria-hidden="true"><span class="round__n">03</span><span class="round__w">Round</span></p>
+    <h2 class="figures__h2" data-lines>The club in numbers</h2>
+    <dl class="figures__grid">
+      <div class="figure">
+        <dt>Years open</dt>
+        <dd class="figure__n" data-count="9" data-count-suffix="">0</dd>
+      </div>
+      <div class="figure">
+        <dt>Beginners through the door</dt>
+        <dd class="figure__n" data-count="1840" data-count-group="true">0</dd>
+      </div>
+      <div class="figure">
+        <dt>Minutes in a round</dt>
+        <dd class="figure__n" data-count="3" data-count-suffix=":00">0</dd>
+      </div>
+      <div class="figure">
+        <dt>Coaches on the floor</dt>
+        <dd class="figure__n" data-count="6">0</dd>
+      </div>
+    </dl>
+  </section>
+
+  <!-- ROUND 04 - THE FIRST-CLASS TIMER. The main interactive. -->
+  <section class="timer" id="first-class" data-round="04" data-still="warmup" data-phase="work">
+    <header class="timer__head">
+      <p class="round" aria-hidden="true"><span class="round__n">04</span><span class="round__w">Round</span></p>
+      <h2 data-lines>Your first class, minute by minute</h2>
+      <p class="timer__sub">Six rounds, three minutes of work and one of rest, the way the hour actually runs. Skip ahead if you do not want to wait out real time.</p>
+    </header>
+
+    <div class="timer__body" data-timer>
+      <div class="timer__stage">
+        <div class="timer__media">
+          <div class="timer__still" data-timer-still></div>
+          <video class="timer__video" muted loop playsinline preload="none" tabindex="-1" data-timer-video></video>
+        </div>
+        <div class="timer__hud">
+          <span class="timer__phase" data-timer-phase>Ready</span>
+          <span class="timer__clock" data-timer-clock>3:00</span>
+          <span class="timer__index"><span data-timer-index>1</span> of 6</span>
+        </div>
+        <div class="timer__bar"><span class="timer__fill" data-timer-fill></span></div>
+      </div>
+
+      <div class="timer__panel">
+        <h3 class="timer__title" data-timer-title>Warm-up</h3>
+        <p class="timer__line" data-timer-line>Rope, shoulders, hips. Eight minutes in you will be warmer than you expected and mildly annoyed about it.</p>
+
+        <div class="timer__controls">
+          <button class="btn btn--solid" type="button" data-timer-act="toggle" data-magnetic><span>Start the class</span></button>
+          <button class="btn btn--line" type="button" data-timer-act="skip"><span>Skip round</span></button>
+          <button class="btn btn--line" type="button" data-timer-act="reset"><span>Reset</span></button>
+          <button class="btn btn--line" type="button" data-timer-act="bell" aria-pressed="false" data-magnetic><span data-timer-bell-label>Bell off</span></button>
+        </div>
+
+        <p class="timer__note">The clock runs against real time, so it stays honest if you switch tabs.</p>
+      </div>
+
+      <p class="sr-only" role="status" aria-live="polite" data-timer-live></p>
+    </div>
+
+    <details class="plan">
+      <summary>Read the whole class as text</summary>
+      <ol class="plan__list">
+        <li><strong>Warm-up, 3 minutes.</strong> Rope, shoulders, hips. Eight minutes in you will be warmer than you expected and mildly annoyed about it.</li>
+        <li><strong>Stance and guard, 3 minutes.</strong> Feet first, then hands. You will feel like you are standing wrong. Everyone does for about a week.</li>
+        <li><strong>The jab, 3 minutes.</strong> One punch, both hands, a hundred times. Your shoulder will mention it tomorrow.</li>
+        <li><strong>Pads with a coach, 3 minutes.</strong> First real contact. The coach calls a shot, you throw it. Nobody is hitting you back.</li>
+        <li><strong>Bag rounds, 3 minutes.</strong> Three minutes alone with the bag. Your breathing will fall apart, and that is normal.</li>
+        <li><strong>Stretching, 3 minutes.</strong> Floor, quiet, the lights go cool. The part people skip and then regret.</li>
+      </ol>
+      <p>One minute of rest sits between every round. Drink, breathe through your nose, stay on your feet.</p>
+    </details>
+
+    <a class="btn btn--solid timer__cta" href="#book" data-magnetic><span>Book a trial</span></a>
+  </section>
+
+  <!-- ROUND 05 - COACHES. Signature move: hovering a strip plays that coach's loop in place. -->
+  <section class="coaches" id="coaches" data-round="05" data-still="pads" data-phase="rest">
+    <header class="coaches__head">
+      <p class="round" aria-hidden="true"><span class="round__n">05</span><span class="round__w">Round</span></p>
+      <h2 data-lines>The coaches</h2>
+    </header>
+    <ul class="coaches__strip" data-coaches>
+      <li class="coach" data-coach tabindex="0" data-still="pads">
+        <div class="coach__media"><div class="coach__still"></div><video class="coach__video" muted loop playsinline preload="none" tabindex="-1"></video></div>
+        <div class="coach__plate">
+          <h3 class="coach__name">Andriy Kovalenko</h3>
+          <p class="coach__role">Head coach. Takes the first three weeks himself.</p>
+        </div>
+      </li>
+      <li class="coach" data-coach tabindex="0" data-still="stance">
+        <div class="coach__media"><div class="coach__still"></div><video class="coach__video" muted loop playsinline preload="none" tabindex="-1"></video></div>
+        <div class="coach__plate">
+          <h3 class="coach__name">Oksana Lysenko</h3>
+          <p class="coach__role">First-time group. Teaches stance before anything else.</p>
+        </div>
+      </li>
+      <li class="coach" data-coach tabindex="0" data-still="jab">
+        <div class="coach__media"><div class="coach__still"></div><video class="coach__video" muted loop playsinline preload="none" tabindex="-1"></video></div>
+        <div class="coach__plate">
+          <h3 class="coach__name">Taras Melnyk</h3>
+          <p class="coach__role">Technique. Will film your jab and show you the frame.</p>
+        </div>
+      </li>
+      <li class="coach" data-coach tabindex="0" data-still="warmup">
+        <div class="coach__media"><div class="coach__still"></div><video class="coach__video" muted loop playsinline preload="none" tabindex="-1"></video></div>
+        <div class="coach__plate">
+          <h3 class="coach__name">Yuliia Bondar</h3>
+          <p class="coach__role">Conditioning. Runs the warm-up and the rope work.</p>
+        </div>
+      </li>
+      <li class="coach" data-coach tabindex="0" data-still="bag">
+        <div class="coach__media"><div class="coach__still"></div><video class="coach__video" muted loop playsinline preload="none" tabindex="-1"></video></div>
+        <div class="coach__plate">
+          <h3 class="coach__name">Dmytro Shevchuk</h3>
+          <p class="coach__role">Pads. Calls the shots slowly for as long as you need.</p>
+        </div>
+      </li>
+      <li class="coach" data-coach tabindex="0" data-still="stretch">
+        <div class="coach__media"><div class="coach__still"></div><video class="coach__video" muted loop playsinline preload="none" tabindex="-1"></video></div>
+        <div class="coach__plate">
+          <h3 class="coach__name">Kateryna Rudenko</h3>
+          <p class="coach__role">Women's beginner group and the Sunday open mat.</p>
+        </div>
+      </li>
+    </ul>
+  </section>
+
+  <!-- ROUND 06 - THE ROOM. Signature move: horizontal reel driven by vertical scroll. -->
+  <section class="reel" id="room" data-round="06" data-still="night" data-phase="work" data-reel>
+    <div class="reel__pin" data-reel-pin>
+      <header class="reel__head">
+        <p class="round round--light" aria-hidden="true"><span class="round__n">06</span><span class="round__w">Round</span></p>
+        <h2>The room</h2>
+      </header>
+      <div class="reel__track" data-reel-track>
+        <figure class="frame"><img src="assets/stills/night.svg" alt="The gym after the last class, ring ropes under a single overhead light." width="1600" height="900" loading="lazy" decoding="async"><figcaption>Podil, after the last class.</figcaption></figure>
+        <figure class="frame"><img src="assets/stills/wraps.svg" alt="Hand wraps being taped, shot close enough to see the weave." width="1600" height="900" loading="lazy" decoding="async"><figcaption>Wraps are kept at the gym. You do not need to own any.</figcaption></figure>
+        <figure class="frame"><img src="assets/stills/stance.svg" alt="Floor marks showing where the feet go for a boxing stance." width="1600" height="900" loading="lazy" decoding="async"><figcaption>The floor is marked. Week one is mostly these two squares.</figcaption></figure>
+        <figure class="frame"><img src="assets/stills/jab.svg" alt="A jab shot at a slow shutter, the glove leaving long light streaks." width="1600" height="900" loading="lazy" decoding="async"><figcaption>One punch, a hundred times, both hands.</figcaption></figure>
+        <figure class="frame"><img src="assets/stills/pads.svg" alt="The instant a glove meets a coach's pad." width="1600" height="900" loading="lazy" decoding="async"><figcaption>Pads. The coach absorbs it, not you.</figcaption></figure>
+        <figure class="frame"><img src="assets/stills/bag.svg" alt="A heavy bag hanging still on its chain." width="1600" height="900" loading="lazy" decoding="async"><figcaption>Eight bags, so nobody waits for one.</figcaption></figure>
+        <figure class="frame"><img src="assets/stills/stretch.svg" alt="The floor at the end of a class, lit cool and low." width="1600" height="900" loading="lazy" decoding="async"><figcaption>The last three minutes are on the floor.</figcaption></figure>
+      </div>
+    </div>
+  </section>
+
+  <!-- ROUND 07 - SCHEDULE. Signature move: rows morph with the View Transitions API. -->
+  <section class="sched" id="schedule" data-round="07" data-still="stance" data-phase="rest">
+    <header class="sched__head">
+      <p class="round" aria-hidden="true"><span class="round__n">07</span><span class="round__w">Round</span></p>
+      <h2 data-lines>The beginner schedule</h2>
+    </header>
+
+    <div class="sched__controls">
+      <div class="switch" role="group" aria-label="Day" data-switch="day">
+        <button type="button" aria-pressed="true" data-value="mon">Mon</button>
+        <button type="button" aria-pressed="false" data-value="tue">Tue</button>
+        <button type="button" aria-pressed="false" data-value="wed">Wed</button>
+        <button type="button" aria-pressed="false" data-value="thu">Thu</button>
+        <button type="button" aria-pressed="false" data-value="fri">Fri</button>
+        <button type="button" aria-pressed="false" data-value="sat">Sat</button>
+        <button type="button" aria-pressed="false" data-value="sun">Sun</button>
+      </div>
+      <div class="switch switch--level" role="group" aria-label="Level" data-switch="level">
+        <button type="button" aria-pressed="true" data-value="first">First time</button>
+        <button type="button" aria-pressed="false" data-value="beginner">Beginner</button>
+        <button type="button" aria-pressed="false" data-value="open">Open</button>
+      </div>
+    </div>
+
+    <div class="sched__rows" data-sched-rows aria-live="polite">
+      <div class="srow"><span class="srow__time">07:00</span><span class="srow__class">First time, 60 min</span><span class="srow__coach">Oksana Lysenko</span></div>
+      <div class="srow"><span class="srow__time">12:30</span><span class="srow__class">First time, 60 min</span><span class="srow__coach">Andriy Kovalenko</span></div>
+      <div class="srow"><span class="srow__time">19:15</span><span class="srow__class">First time, 75 min</span><span class="srow__coach">Oksana Lysenko</span></div>
+    </div>
+    <p class="sched__note">Trial classes sit inside the first-time hours. Bring indoor shoes and water, nothing else.</p>
+  </section>
+
+  <!-- ROUND 08 - PRICES. Signature move: a 60ms staggered reveal, nothing else. -->
+  <section class="prices" id="prices" data-round="08" data-still="bag" data-phase="rest">
+    <header class="prices__head">
+      <p class="round" aria-hidden="true"><span class="round__n">08</span><span class="round__w">Round</span></p>
+      <h2 data-lines>Prices</h2>
+    </header>
+    <div class="prices__grid" data-prices>
+      <article class="price" data-price>
+        <h3 class="price__name">Trial class</h3>
+        <p class="price__amount"><span class="price__num">0</span><span class="price__unit">UAH</span></p>
+        <p class="price__body">One class in a first-time group. Wraps and gloves are provided. If it is not for you, that is the end of it.</p>
+        <a class="btn btn--solid" href="#book" data-magnetic><span>Book a trial</span></a>
+      </article>
+      <article class="price price--wide" data-price>
+        <h3 class="price__name">Eight classes a month</h3>
+        <p class="price__amount"><span class="price__num">2 400</span><span class="price__unit">UAH</span></p>
+        <p class="price__body">Two classes a week, which is the pace the first three weeks are written for. Pads with a coach are included once a week.</p>
+        <p class="price__meta">Most beginners stay on this one.</p>
+        <a class="btn btn--solid" href="#book" data-magnetic><span>Book a trial</span></a>
+      </article>
+      <article class="price" data-price>
+        <h3 class="price__name">Unlimited</h3>
+        <p class="price__amount"><span class="price__num">3 600</span><span class="price__unit">UAH</span></p>
+        <p class="price__body">Every group, every open mat, plus the Sunday technique hour. Sensible after a couple of months, not before.</p>
+        <a class="btn btn--solid" href="#book" data-magnetic><span>Book a trial</span></a>
+      </article>
+    </div>
+  </section>
+
+  <!-- Closing band. The arc completes here and the bell rings once if audio is on. -->
+  <section class="book" id="book" data-round="08" data-still="wraps" data-phase="work">
+    <div class="book__copy">
+      <h2 data-lines>Book a trial class</h2>
+      <p>Pick a day and we will put you in a first-time group. You will be emailed a time, what to bring, and the name of the coach who meets you at the door.</p>
+      <p class="book__demo">Demo mode: this form validates and then stops. Nothing leaves your browser.</p>
+    </div>
+
+    <form class="form" data-form novalidate>
+      <div class="field">
+        <label for="f-name">Your name</label>
+        <input id="f-name" name="name" type="text" autocomplete="name" required>
+        <p class="field__err" data-err-for="f-name" hidden></p>
+      </div>
+      <div class="field">
+        <label for="f-contact">Email or phone</label>
+        <input id="f-contact" name="contact" type="text" autocomplete="email" required>
+        <p class="field__hint">Either one works. We reply the same day.</p>
+        <p class="field__err" data-err-for="f-contact" hidden></p>
+      </div>
+      <div class="field">
+        <label for="f-day">Day that suits you</label>
+        <select id="f-day" name="day">
+          <option value="mon">Monday</option>
+          <option value="tue">Tuesday</option>
+          <option value="wed">Wednesday</option>
+          <option value="thu">Thursday</option>
+          <option value="fri">Friday</option>
+          <option value="sat">Saturday</option>
+          <option value="sun">Sunday</option>
+        </select>
+      </div>
+      <label class="check">
+        <input type="checkbox" name="new" value="yes" checked>
+        <span>I have never trained before</span>
+      </label>
+      <button class="btn btn--solid form__submit" type="submit" data-magnetic><span>Book a trial</span></button>
+      <p class="form__status" role="status" aria-live="polite" data-form-status></p>
+    </form>
+  </section>
+</main>
+
+<footer class="foot" data-foot>
+  <div class="foot__grid">
+    <div class="foot__col">
+      <p class="foot__mark">JAB</p>
+      <p>Hlybochytska 32, Podil<br>Kyiv, 04050</p>
+    </div>
+    <div class="foot__col">
+      <p><a href="#first-class">The first class</a></p>
+      <p><a href="#schedule">Beginner schedule</a></p>
+      <p><a href="#prices">Prices</a></p>
+      <p><a href="#book">Book a trial</a></p>
+    </div>
+    <div class="foot__col">
+      <p>Weekdays 07:00 to 22:00<br>Weekends 09:00 to 18:00</p>
+      <p><a href="tel:+380445512087">+380 44 551 20 87</a></p>
+    </div>
+  </div>
+  <p class="foot__note"><strong>Concept project.</strong> JAB does not exist. The club, the coaches, the prices, the schedule and the phone number are fictional, the footage is illustrative, and the forms are in demo mode. Built as a front-end exercise.</p>
+</footer>
+
+<script defer src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+<script defer src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/lenis@1.1.18/dist/lenis.min.js"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/split-type@0.3.4/umd/index.min.js"></script>
+<script defer src="js/jab.js"></script>
+</body>
+</html>
