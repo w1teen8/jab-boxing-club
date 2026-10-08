@@ -53,7 +53,7 @@
     types: [["webm", "video/webm"], ["mp4", "video/mp4"]]
   };
 
-  function stillURL(name) { return "assets/stills/" + name + ".svg"; }
+  function stillURL(name) { return "assets/stills/" + name + ".webp"; }
 
   /* If anything in here throws, drop the pre-hide so no text is ever lost. */
   function panic(err) {
@@ -499,9 +499,9 @@
 
     coaches.forEach(function (li) {
       var name = li.getAttribute("data-still");
-      var still = $(".coach__still", li);
       var video = $(".coach__video", li);
-      if (still) still.style.backgroundImage = "url(" + stillURL(name) + ")";
+      /* The still is an <img> with loading="lazy", so the browser decides when
+         to fetch it. Nothing to set here. */
 
       function enter() {
         attachAndPlay(video, name).then(function (ok) {
@@ -1082,10 +1082,6 @@
     if (!hasST) {
       /* No ScrollTrigger: show everything and keep the page usable. */
       html.dataset.js = "off";
-      $$("[data-coach]").forEach(function (li) {
-        var s = $(".coach__still", li);
-        if (s) s.style.backgroundImage = "url(" + stillURL(li.getAttribute("data-still")) + ")";
-      });
       setupFigures();
       return;
     }

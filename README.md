@@ -41,7 +41,7 @@ rather than an ES module, so `file://` works.
 index.html            one page, all sections
 css/styles.css        design system and every section
 js/jab.js             one classic script, sectioned 1 to 16
-assets/stills/        8 plates, duotone, about 14 KB in total
+assets/stills/        16 graded WebP plates from Unsplash, ~1.1 MB total
 assets/video/         empty, with a README naming the files to drop in
 ```
 
@@ -63,6 +63,10 @@ page tint, the timer phase chip and the wipe all read from one `--phase` hook.
 Type is Archivo Narrow for display and every number, Archivo for body. Numbers
 are tabular everywhere, because time is the primary content type on this page.
 Corner radius is zero, globally. Scorecards are not rounded.
+
+Photography is graded to one near-monochrome look, warm for work shots and
+cool for rest shots, so ten different sources read as one roll of film instead
+of a stock grid, and never fight the five-value palette.
 
 Contrast was checked against the plate each string actually sits on, not against
 an average: graphite on canvas 13.0:1, chalk on graphite 14.3:1, chalk on red
@@ -139,11 +143,16 @@ errors below, a status region on the form, and no audio without a user action.
 
 ## Known gaps
 
-- **No footage.** The eight plates in `assets/stills/` are drawn, not filmed.
-  The video architecture is complete and wired; it needs real files, which
-  `assets/video/README.md` names and specifies. The page is designed to read
-  correctly either way, which is why the stills are compositions rather than
-  grey boxes.
+- **Stills, not moving footage.** The plates in `assets/stills/` are real
+  photographs from Unsplash, cropped and graded to one look. See
+  `ATTRIBUTION.md`. The video layer is complete and wired but needs real
+  loops, which `assets/video/README.md` names and specifies. The page is
+  designed to read correctly either way, which is also what mobile and
+  reduced-motion users get.
+- **The coach strips are details, not faces.** Putting an identifiable real
+  person under an invented name and job title misrepresents them, whatever the
+  image licence allows. Reasoning and swap instructions are in
+  `ATTRIBUTION.md`.
 - **Lighthouse has not been run here.** There is no browser in this
   environment, so the performance and accessibility targets are met by
   construction and budget rather than by a measured score.

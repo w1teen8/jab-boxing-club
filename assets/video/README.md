@@ -1,7 +1,7 @@
 # Background loops
 
 This folder is empty on purpose. No footage is committed, so the page ships
-with the still plates in `assets/stills/` standing in for every shot. That is
+with the graded photographs in `assets/stills/` standing in for every shot. That is
 the same presentation mobile and `prefers-reduced-motion` users get, so the
 layout is already designed around it and nothing breaks.
 
@@ -27,6 +27,7 @@ round in `ROUNDS` (`js/jab.js`). Nothing else needs editing.
 | `warmup` | Rope work, feet and shoulders | Timer round 1 |
 | `stance` | Floor marks, feet moving between them | Timer round 2 |
 | `pads` | A coach calling shots on pads | Round 05, timer round 4 |
+| `coach-1` to `coach-6` | Optional portrait loops behind each coach strip | Round 05 hover |
 | `bag` | A heavy bag, mostly still, chain moving | Round 08, timer round 5 |
 | `stretch` | The floor at the end, lit cool and low | Timer round 6 |
 
