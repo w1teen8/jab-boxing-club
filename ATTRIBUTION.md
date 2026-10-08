@@ -72,3 +72,33 @@ Keep that disclosure if you reuse this. If you swap these for photographs of
 actual people, get their consent first, and note that the Mixkit and Unsplash
 licences do not themselves grant rights to a recognisable person's likeness for
 every purpose.
+
+# Champions band
+
+The five photographs in `assets/champions/` are of real, living or historical
+public figures, used editorially. They come from Wikimedia Commons, cropped to
+4:5 and lightly graded. Adapted copies of the CC BY-SA original stay under CC
+BY-SA 3.0.
+
+| File | Person | Licence | Credit |
+|---|---|---|---|
+| `ali.webp` | Muhammad Ali | Public domain | Ira Rosenberg, World Journal Tribune |
+| `klitschko.webp` | Wladimir Klitschko | CC BY 3.0 DE | MSC/Kuhlmann, Munich Security Conference 2023 |
+| `usyk.webp` | Oleksandr Usyk | CC BY 2.0 | Web Summit, 2022 |
+| `lomachenko.webp` | Vasyl Lomachenko | CC BY-SA 3.0 | Wikimedia Commons |
+| `taylor.webp` | Katie Taylor | CC BY 2.0 | cormac70, London 2012 |
+
+The credit also appears on the page itself, under the row, which is what the
+BY and BY-SA terms ask for.
+
+**None of these people is presented as connected to JAB.** Each is named as
+what they actually are, a champion, and the band opens by saying in plain words
+that they have nothing to do with the club. That line is not decorative. It is
+the difference between citing a public figure and inventing an endorsement, and
+it stays if you reuse this.
+
+What is deliberately **not** here: these people as coaches, as members, as
+anything implying they train at or endorse this gym, and any fight footage of
+them. Broadcast footage of modern professional boxing is owned by the
+promoters and broadcasters, no free licence to it exists, and there is no
+version of putting it behind this page that is both legal and honest.

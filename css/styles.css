@@ -455,6 +455,52 @@ section { position: relative; scroll-margin-top: calc(var(--nav-h) + 8px); }
 .spine__panel p { color: rgb(245 241 232 / 0.84); }
 
 /* =========================================================================
+   Champions band. A reference aside, not a round: no number, no signature
+   effect, nothing that competes with the spine above it.
+   ========================================================================= */
+
+.champs {
+  max-width: var(--plate-max); margin: clamp(1rem, 2vw, 1.6rem) auto;
+  background: var(--canvas);
+  padding: clamp(2rem, 5vw, 4rem) clamp(1.2rem, 3vw, 3.5rem);
+}
+.champs__head { max-width: 62ch; margin-bottom: clamp(1.6rem, 3vw, 2.6rem); }
+.champs__head h2 { font-size: clamp(1.6rem, 1.1rem + 2vw, 2.8rem); margin-bottom: 0.9rem; }
+.champs__head p { opacity: 0.78; }
+
+.champs__row {
+  list-style: none; margin: 0; padding: 0;
+  display: grid; gap: clamp(0.8rem, 1.6vw, 1.4rem);
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+}
+.champ img {
+  width: 100%; height: auto; aspect-ratio: 4 / 5;
+  object-fit: cover;
+  background: var(--graphite);
+  filter: brightness(0.94);
+}
+.champ h3 {
+  font-size: clamp(0.95rem, 0.75rem + 0.6vw, 1.2rem);
+  margin: 0.7rem 0 0.25rem;
+}
+.champ p { font-size: 0.85rem; opacity: 0.72; margin: 0; }
+
+.champs__credit {
+  margin-top: clamp(1.4rem, 3vw, 2.2rem);
+  padding-top: 0.9rem;
+  border-top: 1px solid rgb(28 29 31 / 0.18);
+  font-size: 0.78rem; opacity: 0.66; max-width: 100ch;
+}
+.champs__credit a { color: inherit; }
+
+@media (max-width: 900px) {
+  .champs__row { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+}
+@media (max-width: 560px) {
+  .champs__row { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
+
+/* =========================================================================
    ROUND 03 - Numbers
    ========================================================================= */
 
