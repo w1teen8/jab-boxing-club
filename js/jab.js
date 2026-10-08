@@ -102,14 +102,16 @@
 
   /* ---------------------------------------------------------- 2 film stage */
 
+  var NOOP_STAGE = { set: function () {}, pause: function () {}, resume: function () {} };
+
   var stage = (function () {
     var root = $("[data-stage]");
-    if (!root) return { set: function () {} };
+    if (!root) return NOOP_STAGE;
 
     var slots = $$("[data-slot]", root).map(function (el) {
       return { el: el, still: $("[data-still-layer]", el), video: $("video", el) };
     });
-    if (slots.length < 2) return { set: function () {} };
+    if (slots.length < 2) return NOOP_STAGE;
 
     var active = 0;
     var currentName = null;
@@ -140,7 +142,28 @@
       }
     }
 
-    return { set: set };
+    /* The timer section lays a solid canvas plate over the whole stage, so
+       while it is on screen the background loop is both invisible and a
+       second decode. Park it and give the frame back. */
+    var parked = false;
+
+    function pause() {
+      parked = true;
+      slots.forEach(function (s) { stopVideo(s.video); });
+    }
+
+    function resume() {
+      if (!parked) return;
+      parked = false;
+      if (!VIDEO.enabled || !desktop() || reduced() || !currentName) return;
+      var cur = slots[active];
+      var want = currentName;
+      attachAndPlay(cur.video, want).then(function (ok) {
+        if (ok && currentName === want && !parked) cur.video.classList.add("is-playing");
+      });
+    }
+
+    return { set: set, pause: pause, resume: resume };
   })();
 
   /* ------------------------------------------------------------- 3 scroll */
@@ -556,6 +579,36 @@
     });
   }
 
+  /* The reel frames ride a transform, so their position cannot be read from
+     scroll offsets. IntersectionObserver accounts for transforms, which makes
+     it the right instrument here, and it keeps playback to the two or three
+     frames actually on screen. */
+  function setupReelVideos() {
+    var vids = $$("[data-reel-video]");
+    if (!vids.length || !VIDEO.enabled || reduced() || !desktop()) return;
+    if (typeof window.IntersectionObserver === "undefined") return;
+
+    var io = new window.IntersectionObserver(function (entries) {
+      entries.forEach(function (e) {
+        var v = e.target;
+        var name = v.getAttribute("data-reel-video");
+        if (e.isIntersecting) {
+          attachAndPlay(v, name).then(function (ok) {
+            if (ok) v.classList.add("is-playing");
+          });
+        } else {
+          stopVideo(v);
+        }
+      });
+    }, { threshold: 0.25 });
+
+    vids.forEach(function (v) { io.observe(v); });
+    return function () {
+      io.disconnect();
+      vids.forEach(stopVideo);
+    };
+  }
+
   /* ----------------------------------------------------------- 11 schedule */
 
   var SCHEDULE = {
@@ -752,6 +805,7 @@
   ];
   var WORK = 180;
   var REST = 60;
+  var timerStage = null;
 
   function setupTimer() {
     var root = $("[data-timer]");
@@ -772,6 +826,7 @@
     var i = 0;             /* round index */
     var resting = false;
     var running = false;
+    var visible = false;   /* is the timer section on screen */
     var endsAt = 0;        /* absolute ms, so the clock cannot drift */
     var remaining = WORK * 1000;
     var raf = null;
@@ -784,6 +839,16 @@
       return Math.floor(s / 60) + ":" + String(s % 60).padStart(2, "0");
     }
 
+    /* The round loop runs whenever the timer is worth watching: on desktop
+       that is any time the section is on screen, so the stage is never a
+       frozen poster. On touch it waits for Start, because below 768px nothing
+       autoplays and video only ever follows a tap. Off screen it pauses, so
+       only one loop is ever running. */
+    function shouldPlay() {
+      if (running) return true;
+      return visible && desktop() && !reduced();
+    }
+
     function paintMedia() {
       var name = ROUNDS[i].still;
       if (elStill) {
@@ -794,9 +859,14 @@
         }, reduced() ? 0 : 200);
       }
       stopVideo(elVideo);
-      if (running && !resting) {
+      if (shouldPlay()) {
         attachAndPlay(elVideo, name).then(function (ok) {
-          if (ok) elVideo.classList.add("is-playing");
+          /* The round may have moved on while the file was loading. */
+          if (ok && name === ROUNDS[i].still && shouldPlay()) {
+            elVideo.classList.add("is-playing");
+          } else if (ok) {
+            stopVideo(elVideo);
+          }
         });
       }
     }
@@ -950,6 +1020,17 @@
     });
 
     reset();
+
+    /* Handed to the scroll context, which owns the trigger so it dies with
+       the breakpoint rather than leaking. */
+    timerStage = {
+      setVisible: function (v) {
+        if (visible === v) return;
+        visible = v;
+        if (v) paintMedia();
+        else if (!running) stopVideo(elVideo);
+      }
+    };
   }
 
   /* ---------------------------------------------------------------- 15 form */
@@ -1003,6 +1084,19 @@
   }
 
   /* ----------------------------------------------------------- 16 the close */
+
+  /* Drives the timer stage from the viewport so the loop only runs while the
+     section is actually being looked at. */
+  function setupTimerStage() {
+    var sec = document.getElementById("first-class");
+    if (!sec || !timerStage || !hasST) return;
+    window.ScrollTrigger.create({
+      trigger: sec,
+      start: "top 92%",
+      end: "bottom 8%",
+      onToggle: function (self) { timerStage.setVisible(self.isActive); }
+    });
+  }
 
   function setupFoot() {
     var foot = $("[data-foot]");
@@ -1109,6 +1203,7 @@
       setupFigures();
       setupPrices();
       setupSpinePanels();
+      setupTimerStage();
       setupFoot();
       var undoLines = revealLines();
       return function () { if (undoLines) undoLines(); };
@@ -1120,7 +1215,8 @@
       var a = setupTicker();
       var b = fineQuery.matches ? setupCursor() : null;
       var c = fineQuery.matches ? setupMagnetic() : null;
-      return function () { [a, b, c].forEach(function (fn) { if (fn) fn(); }); };
+      var d = setupReelVideos();
+      return function () { [a, b, c, d].forEach(function (fn) { if (fn) fn(); }); };
     });
 
     /* Below 768px the reel is a stack and the ticker runs along the bottom. */

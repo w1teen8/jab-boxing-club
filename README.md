@@ -41,7 +41,7 @@ rather than an ES module, so `file://` works.
 index.html            one page, all sections
 css/styles.css        design system and every section
 js/jab.js             one classic script, sectioned 1 to 16
-assets/stills/        16 graded WebP plates from Unsplash, ~1.1 MB total
+assets/stills/        14 poster frames, one per loop, ~250 KB total
 assets/video/         14 graded loops, mp4 + webm, ~17 MB total
 ```
 
@@ -64,9 +64,10 @@ Type is Archivo Narrow for display and every number, Archivo for body. Numbers
 are tabular everywhere, because time is the primary content type on this page.
 Corner radius is zero, globally. Scorecards are not rounded.
 
-Photography is graded to one near-monochrome look, warm for work shots and
-cool for rest shots, so ten different sources read as one roll of film instead
-of a stock grid, and never fight the five-value palette.
+Footage is graded to one near-monochrome look, warm for work and cool for
+rest, so twelve separate clips read as one roll of film instead of a stock
+grid, and never fight the five-value palette. Every still on the page is the
+first frame of its own loop, so a poster never cuts to different content.
 
 Contrast was checked against the plate each string actually sits on, not against
 an average: graphite on canvas 13.0:1, chalk on graphite 14.3:1, chalk on red
@@ -143,11 +144,10 @@ errors below, a status region on the form, and no audio without a user action.
 
 ## Known gaps
 
-- **The coach strips are framed off the face on purpose.** Putting an
-  identifiable real person under an invented name and job title misrepresents
-  them, whatever the licence allows, so each coach loop is a portrait window
-  cropped onto gloves, hands or the room. Reasoning and swap instructions are
-  in `ATTRIBUTION.md`.
+- **The coaches are stock performers under invented names.** The licence
+  permits it and the page discloses it twice, in the band under the hero and
+  in the footer. If you swap in photographs of real people, get their consent
+  first: see `ATTRIBUTION.md`.
 - **Lighthouse has not been run here.** There is no browser in this
   environment, so the performance and accessibility targets are met by
   construction and budget rather than by a measured score.

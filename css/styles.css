@@ -628,7 +628,12 @@ section { position: relative; scroll-margin-top: calc(var(--nav-h) + 8px); }
   will-change: transform;
 }
 .frame { margin: 0; flex: 0 0 auto; width: min(76vw, 680px); }
-.frame img { width: 100%; height: auto; background: #111; }
+/* The poster is a frame of the loop itself, so there is nothing to cross
+   between the two states and object-fit keeps the box exact either way. */
+.frame video {
+  width: 100%; height: auto; aspect-ratio: 16 / 9;
+  object-fit: cover; background: #111;
+}
 .frame figcaption {
   margin-top: 0.7rem; color: rgb(245 241 232 / 0.72);
   font-size: 0.9rem;

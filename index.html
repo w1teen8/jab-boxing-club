@@ -14,7 +14,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo+Narrow:wght@400;500;600;700&family=Archivo:wght@400;500&display=swap">
-<link rel="preload" as="image" href="assets/stills/wraps.webp" fetchpriority="high">
+<link rel="preload" as="image" href="assets/stills/wraps.webp" fetchpriority="high" type="image/webp">
 <link rel="stylesheet" href="css/styles.css">
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' fill='%231c1d1f'/%3E%3Crect x='6' y='14' width='20' height='4' fill='%23ce2b22'/%3E%3C/svg%3E">
 
@@ -141,7 +141,7 @@
 
   <!-- Required disclosure, kept out of the hero stack. -->
   <aside class="disclosure" id="concept">
-    <p><strong>Concept project.</strong> JAB is not a real club. The gym, the coaches, the prices and the schedule are invented, the footage is illustrative, and both forms are in demo mode: nothing is sent anywhere.</p>
+    <p><strong>Concept project.</strong> JAB is not a real club. The gym, the prices and the schedule are invented, and both forms are in demo mode: nothing is sent anywhere. The coaches are invented too: the names are made up and the people shown are performers in licensed stock footage, not staff of anything.</p>
   </aside>
 
   <!-- ROUND 02 - THE SPINE. Signature move: the stage video stays pinned while the round text scrolls over it. -->
@@ -308,13 +308,14 @@
         <h2>The room</h2>
       </header>
       <div class="reel__track" data-reel-track>
-        <figure class="frame"><img src="assets/stills/room.webp" alt="A boxing gym interior, the ring in the middle of the floor and fight posters covering the back wall." width="1600" height="900" loading="lazy" decoding="async"><figcaption>Podil, between classes.</figcaption></figure>
-        <figure class="frame"><img src="assets/stills/wraps.webp" alt="Hands being taped with a boxing wrap before a class." width="1600" height="900" loading="lazy" decoding="async"><figcaption>Wraps are kept at the gym. You do not need to own any.</figcaption></figure>
-        <figure class="frame"><img src="assets/stills/stance.webp" alt="A boxer holding a guard, gloves up, beside the ring ropes." width="1600" height="900" loading="lazy" decoding="async"><figcaption>Hands stay up. That is most of week one.</figcaption></figure>
-        <figure class="frame"><img src="assets/stills/jab.webp" alt="An arm extended into a jab, lit against a dark room." width="1600" height="900" loading="lazy" decoding="async"><figcaption>One punch, a hundred times, both hands.</figcaption></figure>
-        <figure class="frame"><img src="assets/stills/pads.webp" alt="A coach holding focus pads while a boxer throws into them." width="1600" height="900" loading="lazy" decoding="async"><figcaption>Pads. The coach absorbs it, not you.</figcaption></figure>
-        <figure class="frame"><img src="assets/stills/bag.webp" alt="A row of heavy bags hanging along a gym wall." width="1600" height="900" loading="lazy" decoding="async"><figcaption>Eight bags, so nobody waits for one.</figcaption></figure>
-        <figure class="frame"><img src="assets/stills/speedbag.webp" alt="A speed bag hanging in front of a wall of old fight posters." width="1600" height="900" loading="lazy" decoding="async"><figcaption>The speed bag is nobody's first week.</figcaption></figure>
+        <figure class="frame"><video data-reel-video="night" poster="assets/stills/night.webp" width="1280" height="720" muted loop playsinline preload="none" tabindex="-1" aria-label="The gym empty, the bags still, the floor reflecting the lights."></video><figcaption>Podil, after the last class.</figcaption></figure>
+        <figure class="frame"><video data-reel-video="wraps" poster="assets/stills/wraps.webp" width="1280" height="720" muted loop playsinline preload="none" tabindex="-1" aria-label="Hands being taped with a boxing wrap before a class."></video><figcaption>Wraps are kept at the gym. You do not need to own any.</figcaption></figure>
+        <figure class="frame"><video data-reel-video="stance" poster="assets/stills/stance.webp" width="1280" height="720" muted loop playsinline preload="none" tabindex="-1" aria-label="A boxer holding a guard with the hands up."></video><figcaption>Hands stay up. That is most of week one.</figcaption></figure>
+        <figure class="frame"><video data-reel-video="jab" poster="assets/stills/jab.webp" width="1280" height="720" muted loop playsinline preload="none" tabindex="-1" aria-label="A straight punch thrown toward the camera in a dark room."></video><figcaption>One punch, a hundred times, both hands.</figcaption></figure>
+        <figure class="frame"><video data-reel-video="pads" poster="assets/stills/pads.webp" width="1280" height="720" muted loop playsinline preload="none" tabindex="-1" aria-label="A coach holding focus mitts while a boxer throws into them."></video><figcaption>Pads. The coach absorbs it, not you.</figcaption></figure>
+        <figure class="frame"><video data-reel-video="warmup" poster="assets/stills/warmup.webp" width="1280" height="720" muted loop playsinline preload="none" tabindex="-1" aria-label="Rope work in a dark gym."></video><figcaption>The first eight minutes are rope.</figcaption></figure>
+        <figure class="frame"><video data-reel-video="bag" poster="assets/stills/bag.webp" width="1280" height="720" muted loop playsinline preload="none" tabindex="-1" aria-label="The bag room, bags hanging in a row."></video><figcaption>Eight bags, so nobody waits for one.</figcaption></figure>
+        <figure class="frame"><video data-reel-video="stretch" poster="assets/stills/stretch.webp" width="1280" height="720" muted loop playsinline preload="none" tabindex="-1" aria-label="A quiet hall at the end of a session."></video><figcaption>The last three minutes are on the floor.</figcaption></figure>
       </div>
     </div>
   </section>
@@ -439,7 +440,7 @@
       <p><a href="tel:+380445512087">+380 44 551 20 87</a></p>
     </div>
   </div>
-  <p class="foot__note"><strong>Concept project.</strong> JAB does not exist. The club, the coaches, the prices, the schedule and the phone number are fictional, the footage is illustrative, and the forms are in demo mode. Built as a front-end exercise.</p>
+  <p class="foot__note"><strong>Concept project.</strong> JAB does not exist. The club, the prices, the schedule and the phone number are fictional and the forms are in demo mode. Every coach name is invented, and the people on screen are performers in licensed stock footage who have no connection to any of it. Built as a front-end exercise.</p>
 </footer>
 
 <script defer src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
