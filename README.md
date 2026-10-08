@@ -42,7 +42,7 @@ index.html            one page, all sections
 css/styles.css        design system and every section
 js/jab.js             one classic script, sectioned 1 to 16
 assets/stills/        16 graded WebP plates from Unsplash, ~1.1 MB total
-assets/video/         empty, with a README naming the files to drop in
+assets/video/         14 graded loops, mp4 + webm, ~17 MB total
 ```
 
 ## Design system
@@ -115,7 +115,7 @@ class is also available as plain text under the timer.
 | Budget | How it is met |
 |---|---|
 | Transform and opacity only | Every tween animates `x`, `y`, `scaleX` or `opacity`. The one exception is the dial arc's `stroke-dashoffset`, which paints but does not lay out. |
-| Video under 3 MB on first load | Only the active loop is ever attached and played. Everything else stays `preload="none"` and paused. |
+| Video under 3 MB on first load | Only the active loop is ever attached and played; everything else stays `preload="none"` and paused. First load is the hero loop alone, 0.7 MB. Largest single file is 1.5 MB. |
 | JS under 200 KB gzip | GSAP, ScrollTrigger, Lenis and SplitType from CDN, plus about 10 KB of page script. Roughly 55 KB gzip in total. |
 | CLS under 0.05 | Fixed nav height, `aspect-ratio` on every media box, `min-h: 100dvh` rather than `100vh`, and reveal targets that change opacity rather than layout. |
 | No scroll listeners | ScrollTrigger and pointer events only. No `addEventListener('scroll')` anywhere. |
@@ -143,16 +143,11 @@ errors below, a status region on the form, and no audio without a user action.
 
 ## Known gaps
 
-- **Stills, not moving footage.** The plates in `assets/stills/` are real
-  photographs from Unsplash, cropped and graded to one look. See
-  `ATTRIBUTION.md`. The video layer is complete and wired but needs real
-  loops, which `assets/video/README.md` names and specifies. The page is
-  designed to read correctly either way, which is also what mobile and
-  reduced-motion users get.
-- **The coach strips are details, not faces.** Putting an identifiable real
-  person under an invented name and job title misrepresents them, whatever the
-  image licence allows. Reasoning and swap instructions are in
-  `ATTRIBUTION.md`.
+- **The coach strips are framed off the face on purpose.** Putting an
+  identifiable real person under an invented name and job title misrepresents
+  them, whatever the licence allows, so each coach loop is a portrait window
+  cropped onto gloves, hands or the room. Reasoning and swap instructions are
+  in `ATTRIBUTION.md`.
 - **Lighthouse has not been run here.** There is no browser in this
   environment, so the performance and accessibility targets are met by
   construction and budget rather than by a measured score.

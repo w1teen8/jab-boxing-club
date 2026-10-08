@@ -42,20 +42,35 @@ Each is reachable at `https://images.unsplash.com/<id>`.
 
 ## Coach strips
 
-Portrait, 760x1350.
+`assets/stills/coach-1.webp` to `coach-6.webp` are **not** Unsplash stills.
+Each is the first frame of that coach's own loop in `assets/video/`, exported
+through the same crop, so the poster and the video are the same image and the
+hover has nothing to jump. Their sources are listed under Video below.
 
-| File | Unsplash photo ID |
+# Video
+
+All fourteen loops in `assets/video/` come from [Mixkit](https://mixkit.co)
+under the [Mixkit Free Stock Video License](https://mixkit.co/license/#videoFree),
+which allows free use in commercial and non-commercial projects without
+attribution or permission. Recorded here anyway.
+
+Each was trimmed, cropped to 1280x720, silenced, and graded with the same curve
+as the photographs so footage and stills read as one roll of film.
+
+| File | Mixkit clip |
 |---|---|
-| `coach-1.webp` | `photo-1566905836650-f0f0aaba045c` |
-| `coach-2.webp` | `photo-1600642597492-2ccee7ff872a` |
-| `coach-3.webp` | `photo-1646780655980-f0b5ca81f8d0` |
-| `coach-4.webp` | `photo-1731572005637-ce0bd30a02b2` |
-| `coach-5.webp` | `photo-1620123449946-30d6efd4b8ba` |
-| `coach-6.webp` | `photo-1754630591156-ef00f2e0d888` |
+| `wraps` | `4596` |
+| `jab` | `40969` |
+| `pads` | `40261` |
+| `night` | `23929` |
+| `warmup` | `23056` |
+| `stance` | `40967` |
+| `bag` | `48373` |
+| `stretch` | `23193` |
 
-**These are deliberately not portraits.** The coach names on the page are
-invented, and putting an identifiable real person's face under an invented name
-and job title misrepresents that person, whatever the image licence allows. So
-each coach strip is a detail of the thing that coach teaches: wraps, tape, the
-speed bag, the ropes, the bags. If you replace these with real portraits, get
-the subject's consent first.
+`coach-1` to `coach-6` are portrait windows cropped from `stance`, `wraps`,
+`jab`, `warmup`, `pads` and `bag` respectively. The crop x offset of each was
+chosen so the window lands on gloves, hands or the room and not on a face, for
+the same reason the coach stills are details: the coach names are invented, and
+an identifiable person under an invented name and job title misrepresents that
+person whatever the licence permits.

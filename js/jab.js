@@ -42,15 +42,20 @@
   var hasLenis = typeof window.Lenis !== "undefined";
   var hasSplit = typeof window.SplitType !== "undefined";
 
-  /* Videos are not committed to this repo. Drop the files named in
-     assets/video/README.md into that folder and flip this to true, or append
-     ?video=1 to the URL to test a batch before committing. Every code path
-     below is live either way: without files the still plate is the shot,
-     which is also exactly what mobile and reduced-motion get. */
+  /* Append ?video=0 to the URL to see the page as mobile and reduced-motion
+     users see it: the still plate is the shot, and nothing else changes.
+     `have` is the manifest of loops that actually ship. Anything not listed
+     stays on its still rather than firing a request that will 404. */
   var VIDEO = {
-    enabled: /[?&]video=1\b/.test(window.location.search),
+    enabled: !/[?&]video=0\b/.test(window.location.search),
     dir: "assets/video/",
-    types: [["webm", "video/webm"], ["mp4", "video/mp4"]]
+    types: [["webm", "video/webm"], ["mp4", "video/mp4"]],
+    have: {
+      wraps: 1, jab: 1, pads: 1, night: 1,
+      warmup: 1, stance: 1, bag: 1, stretch: 1,
+      "coach-1": 1, "coach-2": 1, "coach-3": 1,
+      "coach-4": 1, "coach-5": 1, "coach-6": 1
+    }
   };
 
   function stillURL(name) { return "assets/stills/" + name + ".webp"; }
@@ -71,7 +76,7 @@
      playback is refused or the file is missing, so callers can stay on the
      still without a broken frame. */
   function attachAndPlay(video, name) {
-    if (!VIDEO.enabled || !video || reduced()) return Promise.resolve(false);
+    if (!VIDEO.enabled || !video || reduced() || !VIDEO.have[name]) return Promise.resolve(false);
     if (video.dataset.loaded !== name) {
       while (video.firstChild) video.removeChild(video.firstChild);
       VIDEO.types.forEach(function (t) {
@@ -1066,7 +1071,7 @@
     v.muted = true; v.loop = true; v.playsInline = true; v.setAttribute("playsinline", "");
     v.setAttribute("tabindex", "-1");
     fo.appendChild(v);
-    attachAndPlay(v, "jab").then(function (ok) { if (ok) fo.classList.add("is-playing"); });
+    attachAndPlay(v, "wraps").then(function (ok) { if (ok) fo.classList.add("is-playing"); });
   }
 
   /* ------------------------------------------------------------------ boot */
