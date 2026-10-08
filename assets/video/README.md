@@ -34,12 +34,29 @@ the stills standing in for every shot, load it with `?video=0`.
 
 ## Coach loops, 404x720
 
-`coach-1` to `coach-6`, one per strip in Round 05. Each is a portrait window
-cropped from one of the loops above, framed on gloves, hands or the room rather
-than on a face, for the reason set out in `../../ATTRIBUTION.md`.
+`coach-1` to `coach-6`, one per strip in Round 05. Each comes from its own
+clip, one person per coach, cropped to a portrait window.
 
-Each coach's poster in `assets/stills/` is that loop's own first frame, so the
-still and the video are the same image and the hover has nothing to jump.
+The start time of each is not arbitrary: it is a frame where that person's
+face is sharp and roughly centred, because the poster a strip rests on is
+whatever frame its loop opens with. Picking the start badly gives you a motion
+blur or half a head at the edge of the frame. The chosen windows are:
+
+| Loop | Source clip | Start | Crop x |
+|---|---|---|---|
+| `coach-1` | `c-andriy` | 0.3s | 540 |
+| `coach-2` | `c-oksana` | 6s | 438 |
+| `coach-3` | `c-taras` | 5s | 740 |
+| `coach-4` | `c-yuliia` | 0.5s | 268 |
+| `coach-5` | `c-dmytro` | 4s | 560 |
+| `coach-6` | `c-kateryna` | 9s | 520 |
+
+The strip box is 9:16 and the crop is 404x720, the same ratio, so nothing is
+cropped again at render time: what you see in the file is what the strip shows.
+Move the crop x down to push the subject right, up to push them left.
+
+Who these people are, and what the page says about it, is in
+`../../ATTRIBUTION.md`.
 
 ## Budget
 
